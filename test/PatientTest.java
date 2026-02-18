@@ -44,7 +44,7 @@ class PatientTest {
         assertTrue(out.contains("Bob, Jimmy"));
         assertTrue(out.contains("name:"));
         assertTrue(out.contains("dob:"));
-        assertTrue(out.contains("2000"));
+        assertTrue(out.contains("2001"));
         assertTrue(out.contains("identity:"));
     }
 }
