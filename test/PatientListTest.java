@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Test;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,7 +13,7 @@ class PatientListTest {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             String dateStr = year + "-" + month + "-" + day;
             return formatter.parse(dateStr);
-        } catch (java.text.ParseException e){ // dont really need to handle here since is only used for testing and wont be throwing null, and test would fail anyway
+        } catch (ParseException e){ // dont really need to handle here since is only used for testing and wont be throwing null, and test would fail anyway
             return null;
         }
     }
@@ -132,5 +133,79 @@ class PatientListTest {
         assertEquals(pat1,pList.next());
         pList.initIteration();
         assertEquals(pat1,pList.next());
+    }
+
+    @Test
+    void saveToFileTest(){
+
+        // test save then import
+        PatientList pList = new PatientList(3);
+        PatientIdentity id1 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2001,1,1));
+        Patient pat1 = new Patient(id1);
+        pList.add(pat1);
+        PatientIdentity id2 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2000,1,1));
+        Patient pat2 = new Patient(id2);
+        pList.add(pat2);
+        PatientIdentity id3 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2002,1,1));
+        Patient pat3 = new Patient(id3);
+        pList.add(pat3);
+
+        assertTrue(pList.saveToFile("testList1.csv"));
+        PatientList pListFile = new PatientList(3);
+        assertTrue(pListFile.importFromFile("testList1.csv"));
+        pList.initIteration();
+        pListFile.initIteration();
+
+        // has all 3 w/ order
+        assertTrue(pList.next().getPatientID().match(pListFile.next().getPatientID()));
+        assertTrue(pList.next().getPatientID().match(pListFile.next().getPatientID()));
+        assertTrue(pList.next().getPatientID().match(pListFile.next().getPatientID()));
+
+
+        // save empty list test (creates empty file)
+        PatientList emptyList = new PatientList(10);
+        assertTrue(emptyList.saveToFile("emptyList.csv"));
+
+        PatientList loadedList = new PatientList(10);
+        assertTrue(loadedList.importFromFile("emptyList.csv"));
+
+        loadedList.initIteration();
+        assertNull(loadedList.next()); // also covers loading empty
+    }
+
+    @Test
+    void importFromFileTest(){
+        // import from file + find patient
+        PatientList fileList = new PatientList(1000);
+        assertTrue(fileList.importFromFile("patients1000.csv"));
+
+        PatientIdentity expected = new PatientIdentity(
+                new Name("Walter","Schmidt"),
+                makeDate(2004,2,5)
+        );
+        Patient expectedPatient = new Patient(expected);
+
+        assertTrue(expectedPatient.getPatientID().match(fileList.find(expected).getPatientID()));
+
+
+        // test importing file with a bad line
+        // has one bad line, two real lines
+        PatientList badList = new PatientList(10);
+        assertTrue(badList.importFromFile("badLineTestFile.csv"));
+        badList.initIteration();
+        assertNotNull(badList.next());
+        assertNotNull(badList.next());
+        assertNull(badList.next()); // ensure only two entries (bad entry not loaded)
+
+        // test fake file
+        PatientList fakeList = new PatientList(10);
+        assertFalse(fakeList.importFromFile("NotARealFile.csv"));
+
+        // import file too large
+        PatientList smallList = new PatientList(10);
+        assertFalse(smallList.importFromFile("patients1000.csv"));
+        smallList.initIteration();
+        assertNotNull(smallList.next()); // doesn't precheck for too large of a file, so it will be partially imported
+
     }
 }

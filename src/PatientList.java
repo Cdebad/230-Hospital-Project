@@ -1,3 +1,9 @@
+import java.io.FileWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
+
+
 public class PatientList {
     private Patient[] patientArray;
     public PatientList(int maxPatients) { patientArray = new Patient[maxPatients]; } // using nextAvailableIndex for iteration so no +1 to length needed
@@ -56,5 +62,56 @@ public class PatientList {
             }
         }
         return null;
+    }
+
+
+
+    public boolean saveToFile(String filename){
+        File file = new File(filename);
+
+        initIteration();
+        Patient pat;
+        try {
+            FileWriter writer = new FileWriter(file);
+
+            while ((pat = next()) != null) {
+                writer.write(pat.toCSV() + "\n");
+            }
+            writer.close();
+        } catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+
+
+    public boolean importFromFile(String filename){
+        File file = new File(filename);
+
+        try{
+            Scanner scanner = new Scanner(file);
+
+            while (scanner.hasNextLine()){
+                Patient pat = Patient.makePatient(scanner.nextLine());
+
+                if (pat != null){
+                    if (!addOrdered(pat)){
+                        scanner.close();
+                        return false; // reached last index, cant import.
+                    }
+                }
+            }
+            scanner.close();
+
+            // mergesort would go here (would have to swap addOrdered for addUnOrdered)
+
+            //
+        } catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

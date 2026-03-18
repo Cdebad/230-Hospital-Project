@@ -47,4 +47,41 @@ class PatientTest {
         assertTrue(out.contains("2001"));
         assertTrue(out.contains("identity:"));
     }
+
+    @Test
+    void toCSVTest(){
+        PatientIdentity ID = new PatientIdentity(
+                new Name("Jimmy", "Bob"),
+                makeDate(8,11,2001)
+        );
+        Patient pat = new Patient(ID);
+
+        // make sure it is in the correct format
+        assertEquals("Bob,Jimmy,2001-08-11",pat.toCSV());
+    }
+
+    @Test
+    void makePatientTest(){
+        // test for normal line
+        Patient realPat = Patient.makePatient("Bob,Jimmy,2001-08-11");
+        assertNotNull(realPat);
+        assertEquals("Jimmy", realPat.getPatientID().getName().getFirst());
+        assertEquals("Bob", realPat.getPatientID().getName().getLast());
+        assertEquals(makeDate(8,11,2001),realPat.getPatientID().getDob());
+
+        // make sure incorrect/invalid data wont create a patient
+        assertNull(Patient.makePatient("Bob,Jimmy"));
+        assertNull(Patient.makePatient("Bob,Jimmy,8"));
+        assertNull(Patient.makePatient("Bob,Jimmy,fake-da-te"));
+
+        // patient to csv line to patient
+        PatientIdentity ID = new PatientIdentity(
+                new Name("Jimmy", "Bob"),
+                makeDate(8,11,2001)
+        );
+        Patient pat = new Patient(ID);
+        Patient pat2 = Patient.makePatient(pat.toCSV());
+        assertNotNull(pat2);
+        assertTrue(pat.getPatientID().match(pat2.getPatientID()));
+    }
 }
