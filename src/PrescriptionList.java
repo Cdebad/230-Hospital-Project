@@ -31,7 +31,7 @@ public class PrescriptionList {
         }
         padd.next=pbefore.next;
         pbefore.next=padd;
-    };
+    }
 
     private ListRecord iter_record = null;
 
