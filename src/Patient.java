@@ -4,13 +4,16 @@ import java.util.Date;
 public class Patient {
     public Patient(PatientIdentity ID){
         patientID = ID;
+        prescriptions = new PrescriptionList();
     }
 
     private final PatientIdentity patientID; //"should NOT allow the PatientIdentity to be ‘set’ or modified"
+    private final PrescriptionList prescriptions;
 
     public PatientIdentity getPatientID() {
         return patientID;
     }
+    public PrescriptionList getPrescriptionList(){return prescriptions;}
 
     public String toString(){
         return "identity: " + patientID.toString();

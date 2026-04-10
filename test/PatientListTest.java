@@ -208,4 +208,47 @@ class PatientListTest {
         assertNotNull(smallList.next()); // doesn't precheck for too large of a file, so it will be partially imported
 
     }
+
+    @Test
+    void importPrescriptionsFromFileTest(){
+        // import from file + find expected patient
+        PatientList fileList = new PatientList(1000);
+        assertTrue(fileList.importFromFile("patients1000.csv"));
+
+        PatientIdentity expected = new PatientIdentity(
+                new Name("Walter","Schmidt"),
+                makeDate(1993,6,22)
+        );
+        Patient pat = fileList.find(expected);
+        assertNotNull(pat);
+
+        //import prescriptions + iterate through expected
+        assertTrue(fileList.importPrescriptionsFromFile("prescriptions1000.csv"));
+
+        PrescriptionList list = pat.getPrescriptionList();
+
+        list.init();
+        //tests import success + order
+        assertEquals("diazoprine",list.next().getName());
+        assertEquals("heptapine",list.next().getName());
+        assertEquals("alphapine",list.next().getName());
+        assertEquals("floxazone",list.next().getName());
+        assertEquals("chloradril",list.next().getName());
+        assertNull(list.next());
+
+
+        // import bad file (2 good lines, 1 bad line), assert successful import + only two prescriptions
+        PatientList plist = new PatientList(1000);
+        assertTrue(plist.importFromFile("patients1000.csv"));
+        assertTrue(plist.importPrescriptionsFromFile("badLineTestFilePrescriptions.csv"));
+        Patient pat2 = plist.find(expected);
+        PrescriptionList list2 = pat2.getPrescriptionList();
+        list2.init();
+        assertNotNull(list2.next());
+        assertNotNull(list2.next());
+        assertNull(list2.next());
+
+        // test importing not real file
+        assertFalse(plist.importPrescriptionsFromFile("fakefile.csv"));
+    }
 }

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class PatientTest {
 
     private Date makeDate(int month, int day, int year){
-        // the tutorial link in the notes wasnt working, but the description sounded like SimpleDateFormat since we are using java.util.Date - please let me know if I should use something else
         try {
             SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
             String dateStr = month + "/" + day + "/" + year;
@@ -83,5 +82,23 @@ class PatientTest {
         Patient pat2 = Patient.makePatient(pat.toCSV());
         assertNotNull(pat2);
         assertTrue(pat.getPatientID().match(pat2.getPatientID()));
+    }
+
+    @Test
+    void getPrescriptionListTest(){
+        // patient has list and is not null
+        PatientIdentity ID = new PatientIdentity(
+                new Name("Jimmy", "Bob"),
+                makeDate(8,11,2001)
+        );
+        Patient pat = new Patient(ID);
+        assertNotNull(pat.getPrescriptionList());
+
+        //can add and iterate list
+        PrescriptionList list = pat.getPrescriptionList();
+        Prescription p0 = new Prescription("p0name",makeDate(10,25,2000),50,"prescribername");
+        list.add(p0);
+        list.init();
+        assertEquals("p0name",list.next().getName());
     }
 }
