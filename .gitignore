@@ -4,7 +4,8 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-
+**/emptyList.csv
+**/testList1.csv
 ### Compiled Java ###
 *.class
 
