@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Patient {
+public class Patient implements IdentifiedObject {
     public Patient(PatientIdentity ID){
         patientID = ID;
         prescriptions = new PrescriptionList();
@@ -60,5 +60,10 @@ public class Patient {
         } catch (Exception e){
             return null;
         }
+    }
+
+    @Override
+    public Identity getIdentity() {
+        return getPatientID();
     }
 }
