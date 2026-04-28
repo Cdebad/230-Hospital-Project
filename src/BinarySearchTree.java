@@ -1,8 +1,9 @@
 public class BinarySearchTree {
     private TreeNode root;
 
-    public void add( IdentifiedObject obj ) {
+    public boolean add(IdentifiedObject obj ) {
         root = addNode( root, new TreeNode( obj ) );
+        return true;
     }
 
 
@@ -60,6 +61,30 @@ public class BinarySearchTree {
         } else {
             return findNode(root.right,id);
         }
+    }
+
+    private Stack<TreeNode> iterationStack = new Stack<TreeNode>(1024);
+
+    private void pushToLeftmost( TreeNode startingNode, Stack<TreeNode> stack ) {
+        TreeNode node = startingNode;
+        while (node != null) {
+            stack.push(node);
+            node = node.left;
+        }
+    }
+
+    public void init(){
+        iterationStack.empty();
+        pushToLeftmost(root,iterationStack);
+    }
+
+    public IdentifiedObject next(){
+        TreeNode toReturn = iterationStack.pop();
+        if (toReturn == null){
+            return null;
+        }
+        pushToLeftmost(toReturn.right, iterationStack);
+        return toReturn.data;
     }
 
 

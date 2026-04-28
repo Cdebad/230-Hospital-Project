@@ -20,18 +20,9 @@ class PatientListTest {
 
 
     @Test
-    void add() { //d
-        PatientList pList = new PatientList(10);
-        PatientIdentity id = new PatientIdentity(new Name("John","Gilbert"),makeDate(2000,1,1));
-        Patient pat = new Patient(id);
-        for (int i = 0; i<10; i++){
-            assertTrue(pList.add(pat)); // ensure adding works properly up to limit
-        }
-        assertFalse(pList.add(pat));
-
-
-        // below tests that addOrdered works
-        PatientList oList = new PatientList(10);
+    void add() {
+        // below tests that ordered iteration / add works
+        PatientList oList = new PatientList();
         PatientIdentity id1 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2000,1,1));
         Patient pat1 = new Patient(id1);
         PatientIdentity id2 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2001,1,1));
@@ -47,12 +38,13 @@ class PatientListTest {
         assertEquals(pat1,oList.next());
         assertEquals(pat2,oList.next());
         assertEquals(pat3,oList.next());
+        assertNull(oList.next());
 
     }
 
     @Test
     void find() { //d
-        PatientList pList = new PatientList(1000);
+        PatientList pList = new PatientList();
         PatientIdentity id = new PatientIdentity(new Name("John","Gilbert"),makeDate(2000,1,1));
         assertNull(pList.find(id)); // ensure null returned when list is empty
 
@@ -66,7 +58,7 @@ class PatientListTest {
 
 
         // find at edges + middle
-        PatientList pList2 = new PatientList(10);
+        PatientList pList2 = new PatientList();
         PatientIdentity i1 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2000,1,1));
         Patient pat1 = new Patient(i1);
         PatientIdentity i2 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2001,1,1));
@@ -94,27 +86,14 @@ class PatientListTest {
 
     @Test
     void initIteration() {
-        PatientList empty = new PatientList(1000);
+        PatientList empty = new PatientList();
         empty.initIteration();
         assertNull(empty.next()); // make sure it doesnt actually initialize
     }
 
     @Test
     void next() { //d
-        PatientList empty = new PatientList(1000);
-        empty.initIteration();
-        assertNull(empty.next()); // ensure null after init + empty list
-
-        PatientIdentity id = new PatientIdentity(new Name("John","Gilbert"),makeDate(2000,1,1));
-        Patient pat = new Patient(id);
-        empty.add(pat);
-
-        empty.initIteration();
-        assertEquals(pat,empty.next()); // ensure next success
-        assertNull(empty.next()); // ensure null at end of usable range
-
-
-        PatientList pList = new PatientList(2);
+        PatientList pList = new PatientList();
         PatientIdentity id1 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2000,1,1));
         Patient pat1 = new Patient(id1);
         pList.add(pat1);
@@ -125,8 +104,8 @@ class PatientListTest {
         pList.initIteration();
         assertEquals(pat1,pList.next());
         assertEquals(pat2,pList.next()); // ensure next works (x2)
-        assertNull(pList.next()); // ensure null at end of full list
-        assertNull(pList.next()); // ensure stays null (ensure it doesnt go into an invalid index or anything)
+        assertNull(pList.next()); // ensure null at end of range
+        assertNull(pList.next()); // ensure stays null at end of iteration
 
         //test re-init mid loop
         pList.initIteration();
@@ -139,7 +118,7 @@ class PatientListTest {
     void saveToFileTest(){
 
         // test save then import
-        PatientList pList = new PatientList(3);
+        PatientList pList = new PatientList();
         PatientIdentity id1 = new PatientIdentity(new Name("John","Gilbert"),makeDate(2001,1,1));
         Patient pat1 = new Patient(id1);
         pList.add(pat1);
@@ -151,7 +130,7 @@ class PatientListTest {
         pList.add(pat3);
 
         assertTrue(pList.saveToFile("testList1.csv"));
-        PatientList pListFile = new PatientList(3);
+        PatientList pListFile = new PatientList();
         assertTrue(pListFile.importFromFile("testList1.csv"));
         pList.initIteration();
         pListFile.initIteration();
@@ -163,10 +142,10 @@ class PatientListTest {
 
 
         // save empty list test (creates empty file)
-        PatientList emptyList = new PatientList(10);
+        PatientList emptyList = new PatientList();
         assertTrue(emptyList.saveToFile("emptyList.csv"));
 
-        PatientList loadedList = new PatientList(10);
+        PatientList loadedList = new PatientList();
         assertTrue(loadedList.importFromFile("emptyList.csv"));
 
         loadedList.initIteration();
@@ -176,7 +155,7 @@ class PatientListTest {
     @Test
     void importFromFileTest(){
         // import from file + find patient
-        PatientList fileList = new PatientList(1000);
+        PatientList fileList = new PatientList();
         assertTrue(fileList.importFromFile("patients1000.csv"));
 
         PatientIdentity expected = new PatientIdentity(
@@ -190,7 +169,7 @@ class PatientListTest {
 
         // test importing file with a bad line
         // has one bad line, two real lines
-        PatientList badList = new PatientList(10);
+        PatientList badList = new PatientList();
         assertTrue(badList.importFromFile("badLineTestFile.csv"));
         badList.initIteration();
         assertNotNull(badList.next());
@@ -198,21 +177,14 @@ class PatientListTest {
         assertNull(badList.next()); // ensure only two entries (bad entry not loaded)
 
         // test fake file
-        PatientList fakeList = new PatientList(10);
+        PatientList fakeList = new PatientList();
         assertFalse(fakeList.importFromFile("NotARealFile.csv"));
-
-        // import file too large
-        PatientList smallList = new PatientList(10);
-        assertFalse(smallList.importFromFile("patients1000.csv"));
-        smallList.initIteration();
-        assertNotNull(smallList.next()); // doesn't precheck for too large of a file, so it will be partially imported
-
     }
 
     @Test
     void importPrescriptionsFromFileTest(){
         // import from file + find expected patient
-        PatientList fileList = new PatientList(1000);
+        PatientList fileList = new PatientList();
         assertTrue(fileList.importFromFile("patients1000.csv"));
 
         PatientIdentity expected = new PatientIdentity(
@@ -238,7 +210,7 @@ class PatientListTest {
 
 
         // import bad file (2 good lines, 1 bad line), assert successful import + only two prescriptions
-        PatientList plist = new PatientList(1000);
+        PatientList plist = new PatientList();
         assertTrue(plist.importFromFile("patients1000.csv"));
         assertTrue(plist.importPrescriptionsFromFile("badLineTestFilePrescriptions.csv"));
         Patient pat2 = plist.find(expected);
